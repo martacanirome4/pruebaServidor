@@ -40,6 +40,8 @@ Antes de ejecutar el servidor Node.js, asegúrate de tener los siguientes requis
 
 6. Accede al servidor en tu navegador web en: http://localhost:3000.
 
+7. El programa mostrará en la terminal de tu equipo, donde haya sido ejecutado, la información sobre tu sistema de manera periódica
+
 ## Configuración
 
 Puedes ajustar la configuración modificando el archivo 'config.json'. El parámetro 'intervalSeconds' controla la frecuencia con la que se muestra la información del sistema en segundos.
