@@ -1,38 +1,48 @@
+const { constants } = require('fs/promises');
 const http = require('http');
-const os = require('os');
-const process = require('process');
-const fs = require('fs');
+const os = require("os");
+const process = require("process");
+const fs = require("fs");
+
+const hostname = '127.0.0.1';
+const port = 3000;
 
 const server = http.createServer((req, res) => {
-  if (req.url === '/') {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.write('<h1>Node.js Server</h1>');
-    res.write('<h2>System Information:</h2>');
-    res.write('<div id="system-info"></div>');
-  }
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Node.js Server - System Information displayed at CPU terminal\n');
 });
 
 server.listen(3000, 'localhost', () => {
-  console.log('Node.js server is running at http://localhost:3000');
-  console.log(`Node.js version: ${process.version}`);
-  
-  setInterval(() => {
-    const systemInfo = {
-      cpuUsage: (os.cpus()[0].times.user / os.cpus()[0].times.sys).toFixed(2),
-      memoryUsage: ((os.totalmem() - os.freemem()) / os.totalmem() * 100).toFixed(2),
-      systemUptime: os.uptime(),
-      nodeUptime: process.uptime(),
-    };
-    
-    const systemInfoString = JSON.stringify(systemInfo);
-    
-    // Send system info to the client
-    server.getConnections((err, count) => {
-      if (count > 0) {
-        server.clients.forEach(client => {
-          client.send(`data: ${systemInfoString}\n\n`);
-        });
-      }
-    });
-  }, 5000); // Send system info every 5 seconds
+    console.log('Node.js Server is running at http://localhost:3000/');
+    console.log(`Node.js Version: ${process.version}`);
 });
+
+let config = {
+    intervalSeconds: 5,
+};
+
+async function readConfigFile() {
+    try {
+        const configFile = await fs.promises.readFile('config.json', 'utf-8');
+        config = JSON.parse(configFile);
+    } catch (err) {
+        console.log('Error reading configuration file:', err.message);
+    }
+}
+
+readConfigFile();
+
+function showSystemInfo() {
+    console.log('--- System Information ---');
+    console.log(`Platform: ${process.platform}`);
+    console.log(`Architecture: ${process.arch}`);
+    console.log(`Current Directory: ${process.cwd()}`);
+    console.log(`PID: ${process.pid}`);
+    console.log(`Node.js Version: ${process.version}`);
+    console.log(`CPU Usage: ${os.cpus()[0].times.user / os.cpus()[0].times.sys}%`);
+    console.log(`Memory Usage: ${((os.totalmem() - os.freemem()) / os.totalmem() * 100).toFixed(2)}%`);
+    console.log(`System Uptime: ${os.uptime()} seconds`);
+    console.log(`Node.js Uptime: ${process.uptime()} seconds`);
+}
+
+setInterval(showSystemInfo, config.intervalSeconds * 1000);
